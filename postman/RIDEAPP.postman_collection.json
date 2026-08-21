@@ -1,0 +1,542 @@
+{
+  "info": {
+    "name": "RIDEAPP API",
+    "description": "Complete API collection for RIDEAPP ride-hailing platform (Rapido/Ola/Uber clone)\n\nBase URL: http://localhost:5000/api\n\nFlow:\n1. Register/Login via OTP\n2. Book rides, manage drivers, admin operations\n\nDefault Admin Credentials:\n- Email: admin@rideapp.com\n- Password: Admin@123",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/../health",
+          "host": ["{{baseUrl}}"],
+          "path": ["..", "health"]
+        }
+      }
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"9876543210\",\n  \"role\": \"customer\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/send-otp", "host": ["{{baseUrl}}"], "path": ["auth", "send-otp"] }
+          }
+        },
+        {
+          "name": "Verify OTP (Login)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"9876543210\",\n  \"otp\": \"123456\",\n  \"role\": \"customer\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/verify-otp", "host": ["{{baseUrl}}"], "path": ["auth", "verify-otp"] },
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "const json = pm.response.json();",
+                    "if (json.accessToken) {",
+                    "  pm.collectionVariables.set('accessToken', json.accessToken);",
+                    "  pm.collectionVariables.set('customerId', json.user._id);",
+                    "}"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@rideapp.com\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/admin/login", "host": ["{{baseUrl}}"], "path": ["auth", "admin", "login"] },
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "const json = pm.response.json();",
+                    "if (json.accessToken) {",
+                    "  pm.collectionVariables.set('adminToken', json.accessToken);",
+                    "  pm.collectionVariables.set('adminId', json.admin._id);",
+                    "}"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "Register Customer Profile",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rahul Sharma\",\n  \"email\": \"rahul@example.com\",\n  \"gender\": \"male\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Register Driver",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Driver Kumar\",\n  \"vehicleType\": \"bike\",\n  \"vehicleNumber\": \"MH12AB1234\",\n  \"vehicleModel\": \"Honda Activa\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/driver/register", "host": ["{{baseUrl}}"], "path": ["auth", "driver", "register"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customer",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/customer/profile", "host": ["{{baseUrl}}"], "path": ["customer", "profile"] } }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Rahul Sharma Updated\",\n  \"gender\": \"male\"\n}" },
+            "url": { "raw": "{{baseUrl}}/customer/profile", "host": ["{{baseUrl}}"], "path": ["customer", "profile"] }
+          }
+        },
+        {
+          "name": "Add Saved Place",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"home\",\n  \"name\": \"Home\",\n  \"address\": \"123 Main Street, Delhi\",\n  \"lat\": 28.6139,\n  \"lng\": 77.2090\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/customer/saved-places", "host": ["{{baseUrl}}"], "path": ["customer", "saved-places"] }
+          }
+        },
+        {
+          "name": "Get Saved Places",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/customer/saved-places", "host": ["{{baseUrl}}"], "path": ["customer", "saved-places"] } }
+        },
+        {
+          "name": "Get Wallet",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/customer/wallet", "host": ["{{baseUrl}}"], "path": ["customer", "wallet"] } }
+        },
+        {
+          "name": "Add SOS Contact",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Mother\",\n  \"mobile\": \"9876500001\",\n  \"relation\": \"mother\"\n}" },
+            "url": { "raw": "{{baseUrl}}/customer/sos-contacts", "host": ["{{baseUrl}}"], "path": ["customer", "sos-contacts"] }
+          }
+        },
+        {
+          "name": "Get Available Promos",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/customer/promos", "host": ["{{baseUrl}}"], "path": ["customer", "promos"] } }
+        },
+        {
+          "name": "Get Active Ride",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/customer/active-ride", "host": ["{{baseUrl}}"], "path": ["customer", "active-ride"] } }
+        },
+        {
+          "name": "Update FCM Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"fcmToken\": \"your-fcm-device-token\"\n}" },
+            "url": { "raw": "{{baseUrl}}/customer/fcm-token", "host": ["{{baseUrl}}"], "path": ["customer", "fcm-token"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rides",
+      "item": [
+        {
+          "name": "Estimate Fare",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pickupLocation\": {\n    \"address\": \"Connaught Place, Delhi\",\n    \"location\": { \"type\": \"Point\", \"coordinates\": [77.2090, 28.6139] }\n  },\n  \"dropLocation\": {\n    \"address\": \"India Gate, Delhi\",\n    \"location\": { \"type\": \"Point\", \"coordinates\": [77.2295, 28.6129] }\n  },\n  \"vehicleType\": \"bike\",\n  \"city\": \"delhi\",\n  \"distanceKm\": 5.2,\n  \"durationMin\": 20\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/rides/estimate-fare", "host": ["{{baseUrl}}"], "path": ["rides", "estimate-fare"] }
+          }
+        },
+        {
+          "name": "Book Ride",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pickupLocation\": {\n    \"address\": \"Connaught Place, Delhi\",\n    \"location\": { \"type\": \"Point\", \"coordinates\": [77.2090, 28.6139] }\n  },\n  \"dropLocation\": {\n    \"address\": \"India Gate, Delhi\",\n    \"location\": { \"type\": \"Point\", \"coordinates\": [77.2295, 28.6129] }\n  },\n  \"vehicleType\": \"bike\",\n  \"city\": \"delhi\",\n  \"distanceKm\": 5.2,\n  \"durationMin\": 20,\n  \"paymentMode\": \"cash\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/rides/book", "host": ["{{baseUrl}}"], "path": ["rides", "book"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data?.ride?._id) {",
+                  "  pm.collectionVariables.set('rideId', json.data.ride._id);",
+                  "  pm.collectionVariables.set('rideOtp', json.data.otp);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Ride Details",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/rides/{{rideId}}", "host": ["{{baseUrl}}"], "path": ["rides", "{{rideId}}"] } }
+        },
+        {
+          "name": "Get Ride History",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/rides/history?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["rides", "history"] } }
+        },
+        {
+          "name": "Cancel Ride",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Changed plans\"\n}" },
+            "url": { "raw": "{{baseUrl}}/rides/{{rideId}}/cancel", "host": ["{{baseUrl}}"], "path": ["rides", "{{rideId}}", "cancel"] }
+          }
+        },
+        {
+          "name": "Rate Ride",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Great ride!\"\n}" },
+            "url": { "raw": "{{baseUrl}}/rides/{{rideId}}/rate", "host": ["{{baseUrl}}"], "path": ["rides", "{{rideId}}", "rate"] }
+          }
+        },
+        {
+          "name": "Trigger SOS",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "{{baseUrl}}/rides/{{rideId}}/sos", "host": ["{{baseUrl}}"], "path": ["rides", "{{rideId}}", "sos"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Driver",
+      "item": [
+        {
+          "name": "Get Driver Profile",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/driver/profile", "host": ["{{baseUrl}}"], "path": ["driver", "profile"] } }
+        },
+        {
+          "name": "Upload Document",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "multipart/form-data" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "docType", "value": "license", "type": "text" },
+                { "key": "docNumber", "value": "DL-12345678", "type": "text" },
+                { "key": "document", "value": "", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/driver/documents/upload", "host": ["{{baseUrl}}"], "path": ["driver", "documents", "upload"] }
+          }
+        },
+        {
+          "name": "Toggle Online/Offline",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "{{baseUrl}}/driver/toggle-status", "host": ["{{baseUrl}}"], "path": ["driver", "toggle-status"] }
+          }
+        },
+        {
+          "name": "Update Location",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"lat\": 28.6139,\n  \"lng\": 77.2090\n}" },
+            "url": { "raw": "{{baseUrl}}/driver/location", "host": ["{{baseUrl}}"], "path": ["driver", "location"] }
+          }
+        },
+        {
+          "name": "Accept Ride",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "{{baseUrl}}/driver/rides/{{rideId}}/accept", "host": ["{{baseUrl}}"], "path": ["driver", "rides", "{{rideId}}", "accept"] }
+          }
+        },
+        {
+          "name": "Reject Ride",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "{{baseUrl}}/driver/rides/{{rideId}}/reject", "host": ["{{baseUrl}}"], "path": ["driver", "rides", "{{rideId}}", "reject"] }
+          }
+        },
+        {
+          "name": "Arrived at Pickup",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "{{baseUrl}}/driver/rides/{{rideId}}/arrived", "host": ["{{baseUrl}}"], "path": ["driver", "rides", "{{rideId}}", "arrived"] }
+          }
+        },
+        {
+          "name": "Start Ride (Verify OTP)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"otp\": \"{{rideOtp}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/driver/rides/{{rideId}}/start", "host": ["{{baseUrl}}"], "path": ["driver", "rides", "{{rideId}}", "start"] }
+          }
+        },
+        {
+          "name": "Complete Ride",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"actualDistanceKm\": 5.5,\n  \"actualDurationMin\": 22,\n  \"paymentMode\": \"cash\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/driver/rides/{{rideId}}/complete", "host": ["{{baseUrl}}"], "path": ["driver", "rides", "{{rideId}}", "complete"] }
+          }
+        },
+        {
+          "name": "Get Earnings",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/driver/earnings", "host": ["{{baseUrl}}"], "path": ["driver", "earnings"] } }
+        },
+        {
+          "name": "Get Ride History",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/driver/rides?page=1", "host": ["{{baseUrl}}"], "path": ["driver", "rides"] } }
+        },
+        {
+          "name": "Update Bank Details",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountHolderName\": \"Driver Kumar\",\n  \"accountNumber\": \"123456789012\",\n  \"ifscCode\": \"HDFC0001234\",\n  \"upiId\": \"driver@upi\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/driver/bank-details", "host": ["{{baseUrl}}"], "path": ["driver", "bank-details"] }
+          }
+        },
+        {
+          "name": "Request Payout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 500\n}" },
+            "url": { "raw": "{{baseUrl}}/driver/payout", "host": ["{{baseUrl}}"], "path": ["driver", "payout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Dashboard Stats",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/dashboard", "host": ["{{baseUrl}}"], "path": ["admin", "dashboard"] } }
+        },
+        {
+          "name": "Get All Drivers",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/drivers?status=pending", "host": ["{{baseUrl}}"], "path": ["admin", "drivers"] } }
+        },
+        {
+          "name": "Approve Driver",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"approve\": true\n}" },
+            "url": { "raw": "{{baseUrl}}/admin/drivers/{{driverId}}/approve", "host": ["{{baseUrl}}"], "path": ["admin", "drivers", "{{driverId}}", "approve"] }
+          }
+        },
+        {
+          "name": "Block Driver",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"block\": true\n}" },
+            "url": { "raw": "{{baseUrl}}/admin/drivers/{{driverId}}/block", "host": ["{{baseUrl}}"], "path": ["admin", "drivers", "{{driverId}}", "block"] }
+          }
+        },
+        {
+          "name": "Get Customers",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/customers", "host": ["{{baseUrl}}"], "path": ["admin", "customers"] } }
+        },
+        {
+          "name": "Get All Rides",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/rides?status=completed", "host": ["{{baseUrl}}"], "path": ["admin", "rides"] } }
+        },
+        {
+          "name": "Get Live Rides",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/rides/live", "host": ["{{baseUrl}}"], "path": ["admin", "rides", "live"] } }
+        },
+        {
+          "name": "Get Pricing Rules",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/pricing", "host": ["{{baseUrl}}"], "path": ["admin", "pricing"] } }
+        },
+        {
+          "name": "Create Pricing Rule",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"city\": \"delhi\",\n  \"vehicleType\": \"bike\",\n  \"baseFare\": 20,\n  \"perKmRate\": 6,\n  \"perMinRate\": 1,\n  \"minFare\": 25,\n  \"surgeMultiplier\": 1,\n  \"nightChargeMultiplier\": 1.25,\n  \"cancellationCharge\": 10\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/admin/pricing", "host": ["{{baseUrl}}"], "path": ["admin", "pricing"] }
+          }
+        },
+        {
+          "name": "Get Promos",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/promos", "host": ["{{baseUrl}}"], "path": ["admin", "promos"] } }
+        },
+        {
+          "name": "Create Promo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"WELCOME50\",\n  \"description\": \"50% off up to ₹50 on first ride\",\n  \"discountType\": \"percentage\",\n  \"discountValue\": 50,\n  \"maxDiscount\": 50,\n  \"minFare\": 25,\n  \"expiryDate\": \"2026-12-31\",\n  \"usageLimit\": 1000,\n  \"perUserLimit\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/admin/promo", "host": ["{{baseUrl}}"], "path": ["admin", "promo"] }
+          }
+        },
+        {
+          "name": "Revenue Report",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/reports/revenue?from=2026-01-01", "host": ["{{baseUrl}}"], "path": ["admin", "reports", "revenue"] } }
+        },
+        {
+          "name": "Driver Performance Report",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/reports/drivers", "host": ["{{baseUrl}}"], "path": ["admin", "reports", "drivers"] } }
+        },
+        {
+          "name": "Broadcast Notification",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"audience\": \"all\",\n  \"title\": \"Special Offer!\",\n  \"body\": \"Get 50% off on your next ride with code RIDE50\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/admin/broadcast", "host": ["{{baseUrl}}"], "path": ["admin", "broadcast"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Create Razorpay Order",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"rideId\": \"{{rideId}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/payments/create-order", "host": ["{{baseUrl}}"], "path": ["payments", "create-order"] }
+          }
+        },
+        {
+          "name": "Verify Payment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"razorpayOrderId\": \"order_id_here\",\n  \"razorpayPaymentId\": \"pay_id_here\",\n  \"razorpaySignature\": \"signature_here\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/payments/verify", "host": ["{{baseUrl}}"], "path": ["payments", "verify"] }
+          }
+        },
+        {
+          "name": "Pay with Wallet",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"rideId\": \"{{rideId}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/payments/wallet", "host": ["{{baseUrl}}"], "path": ["payments", "wallet"] }
+          }
+        },
+        {
+          "name": "Get Payment History",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/payments/history", "host": ["{{baseUrl}}"], "path": ["payments", "history"] } }
+        },
+        {
+          "name": "Razorpay Webhook",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"payment.captured\",\n  \"payload\": {\n    \"payment\": {\n      \"entity\": {\n        \"order_id\": \"order_id_here\",\n        \"id\": \"pay_id_here\"\n      }\n    }\n  }\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/payments/webhook", "host": ["{{baseUrl}}"], "path": ["payments", "webhook"] }
+          }
+        }
+      ]
+    }
+  ]
+}

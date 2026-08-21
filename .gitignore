@@ -1,0 +1,58 @@
+# ========================
+# Node.js (backend, admin_panel)
+# ========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.env
+.env.*
+!.env.example
+dist/
+backend/logs/*.log
+
+# ========================
+# Flutter (customer_app, driver_app)
+# ========================
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/.pub-cache/
+**/.pub/
+**/pubspec.lock
+*.iml
+customer_app/local.properties
+driver_app/local.properties
+customer_app/android/local.properties
+driver_app/android/local.properties
+customer_app/android/key.properties
+driver_app/android/key.properties
+customer_app/android/app/*.jks
+driver_app/android/app/*.jks
+customer_app/ios/Pods/
+driver_app/ios/Pods/
+customer_app/ios/.symlinks/
+driver_app/ios/.symlinks/
+
+# ========================
+# IDE / Editor
+# ========================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ========================
+# OS
+# ========================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
